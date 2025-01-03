@@ -25,9 +25,9 @@ Route::get('/search-artist', [AppleMusicController::class, 'searchArtist']);
 // Route::get('/artist/{artistId}', [AppleMusicController::class, 'showArtist']);
 Route::get('/artist/{id}', [AppleMusicController::class, 'getArtistById']);
 
-Route::get('/login', function () {
-    return view('auth.apple-login');
-})->name('login');
+// Route::get('/apple-login', function () {
+//     return view('auth.apple-login');
+// })->name('login');
 
 
 Route::get('/login/apple', [AppleAuthController::class, 'redirectToApple'])->name('login.apple');
@@ -35,3 +35,7 @@ Route::get('/login/apple/callback', [AppleAuthController::class, 'handleAppleCal
 
 
 route::get('/album', [AppleMusicController::class, 'getAlbums']);
+
+Auth::routes();
+
+// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
