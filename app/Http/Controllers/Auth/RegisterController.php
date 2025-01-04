@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Mail\RegistrationMailNotification;
 use App\Models\User;
-use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Jobs\RegisterMailJob;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\RegistrationMailNotification;
+use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
@@ -75,7 +76,9 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        Mail::to($user->email)->send(new RegistrationMailNotification($user));
+        // dispatch job
+        RegisterMailJob::dispatch($user);
+
 
         return $user;
     }
