@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AppleAuthController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AppleMusicController;
 
 /*
@@ -18,24 +17,19 @@ use App\Http\Controllers\AppleMusicController;
 
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+});
 
-Route::get('/search-artist', [AppleMusicController::class, 'searchArtist']);
-
-// Route::get('/artist/{artistId}', [AppleMusicController::class, 'showArtist']);
-Route::get('/artist/{id}', [AppleMusicController::class, 'getArtistById']);
-
-// Route::get('/apple-login', function () {
-//     return view('auth.apple-login');
-// })->name('login');
+// login routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
 
-Route::get('/login/apple', [AppleAuthController::class, 'redirectToApple'])->name('login.apple');
-Route::get('/login/apple/callback', [AppleAuthController::class, 'handleAppleCallback'])->name('login.apple.callback');
+Route::get('auth/apple', [LoginController::class, 'redirectToApple'])->name('login.apple');
+Route::get('auth/apple/callback', [LoginController::class, 'handleAppleCallback']);
 
 
-route::get('/album', [AppleMusicController::class, 'getAlbums']);
+Route::get('/auth/apple-music', [AppleMusicController::class, 'redirectToAppleMusic']);
+Route::post('/auth/apple-music/callback', [AppleMusicController::class, 'handleAppleMusicCallback']);
 
-Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/apple-music/artist/{id}', [AppleMusicController::class, 'getArtistDetails']);

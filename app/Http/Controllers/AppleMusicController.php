@@ -2,101 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\AppleMusicService;
+use Firebase\JWT\JWT;
+use App\Helpers\Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class AppleMusicController extends Controller
 {
-    private $tokenService;
-
-    public function __construct(AppleMusicService $tokenService)
+    public function redirectToAppleMusic()
     {
-        $this->tokenService = $tokenService;
+        $developerToken = Helper::generateAppleClientSecret();
+
+        return response()->json(['developerToken' => $developerToken]);
     }
 
-    public function searchArtist(Request $request)
+    public function handleAppleMusicCallback(Request $request)
     {
-
-        // dd($request->all());
-
-        $token = $this->tokenService->generateToken();
-
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->get('https://api.music.apple.com/v1/catalog/us/search', [
-            'term' =>$request->input('artist'),
-            'types' => 'artists',
-        ]);
-
-        // dd($response->json());
-
-        if ($response->failed()) {
-            Log::error('Apple Music API Error: ' . $response->body());
-            return response()->json([
-                'error' => 'Failed to fetch artist.',
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ], $response->status());
+        $userToken = $request->input('userToken');
+        if (!$userToken) {
+            return response()->json(['error' => 'User token is required'], 400);
         }
 
-        // Return the search results as a JSON response
-        return $response->json();
+        // Save or use the user token for Apple Music API requests
+        return response()->json(['message' => 'User token received successfully', 'userToken' => $userToken]);
     }
 
-    public function getArtistById($artistId)
-    {
-        $token = $this->tokenService->generateToken();
-        // dd($token);
+    // public function getArtistDetails($id, Request $request)
+    // {
+    //     $storefront = $request->query('storefront', 'us'); // Default storefront is 'bd'
+    //     $developerToken = $this->generateDeveloperToken();
 
+    //     $response = Http::withHeaders([
+    //         'Authorization' => 'Bearer ' . $developerToken,
+    //     ])->get("https://api.music.apple.com/v1/catalog/{$storefront}/search", [
+    //         'term' => 'Taylor Swift',
+    //         'types' => 'artists',
+    //     ]);
+    //     if ($response->failed()) {
+    //         return response()->json([
+    //             'error' => 'Unable to fetch artist details',
+    //             'status' => $response->status(),
+    //             'body' => $response->body(),
+    //         ], $response->status());
+    //     }
 
+    //     return $response->json();
+    // }
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->get("https://api.music.apple.com/v1/catalog/us/artists/{$artistId}");
+    // private function generateDeveloperToken()
+    // {
 
-        // return $response->json();
+    //     $teamId = env('APPLE_TEAM_ID');
+    //     // $clientId = env('APPLE_CLIENT_ID');
+    //     $keyId = env('APPLE_KEY_ID');
+    //     $privateKey = env('APPLE_PRIVATE_KEY_PATH');
+    //     $claims = [
+    //         'iss' => $teamId,
+    //         'iat' => time(),
+    //         'exp' => time() + (60 * 60 * 24 * 180), // Valid for 6 months
+    //         'aud' => 'https://appleid.apple.com',
+    //     ];
 
-        if ($response->failed()) {
+    //     // Debugging: Output token and claims
+    //     $token = JWT::encode($claims, $privateKey, 'ES256', $keyId);
+    //     // dd([
+    //     //     'claims' => $claims,
+    //     //     'token' => $token,
+    //     // ]);
 
-            return response()->json([
-                'error' => 'Failed to fetch artist.',
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ], $response->status());
-        }
-
-        $artist = $response->json();
-
-        return response()->json(['artist' => $artist]);
-    }
-
-    public function getAlbums()
-    {
-        $token = $this->tokenService->generateToken();
-        // dd($token);
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->get("https://api.music.apple.com/v1/catalog/us/albums/1616728060");
-
-        // return $response->json();
-
-        if ($response->failed()) {
-            // Log or return the actual response for debugging
-            return response()->json([
-                'error' => 'Failed to fetch albums.',
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ], $response->status());
-        }
-
-        $artist = $response->json();
-
-        return response()->json(['artist' => $artist]);
-
-    }
-
+    //     return $token;
+    // }
 }
